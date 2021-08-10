@@ -435,7 +435,13 @@ emacs -Q -batch -l simple-httpd.elc -f httpd-batch-start"
                    (uri-path (httpd-unhex (nth 0 parsed-uri)))
                    (uri-query (append (nth 1 parsed-uri)
                                       (httpd-parse-args content)))
-                   (servlet (httpd-get-servlet uri-path)))
+                   (servlet (httpd-get-servlet uri-path))
+                   ;; use short version in log
+                   (short-content (if (<= (buffer-size) 80)
+                                      content
+                                    (format "%.80s..." content)))
+                   (short-request (reverse (cons (list "Content" short-content)
+                                                 (reverse request)))))
               (erase-buffer)
               (process-put proc :request nil)
               (setf request (nreverse (cons (list "Content" content)
@@ -443,7 +449,7 @@ emacs -Q -batch -l simple-httpd.elc -f httpd-batch-start"
               (httpd-log `(request (date ,(httpd-date-string))
                                    (address ,(car (process-contact proc)))
                                    (get ,uri-path)
-                                   ,(cons 'headers request)))
+                                   ,(cons 'headers short-request)))
               (if (null servlet)
                   (httpd--error-safe proc 404)
                 (condition-case error-case
