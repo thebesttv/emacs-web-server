@@ -405,9 +405,8 @@ emacs -Q -batch -l simple-httpd.elc -f httpd-batch-start"
   (let ((string (format "%s" designator)))
     (if (keywordp designator)
         (substring string 1)
-      (if (string-prefix-p "text" string)
-          (concat string "; charset=utf-8")
-        string))))
+      string)))
+
 ;; Networking code
 
 (defun httpd--connection-close-p (request)
